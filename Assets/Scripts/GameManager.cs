@@ -2,14 +2,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public LevelLoader leveloader;
+    public LevelLoader levelLoader;
     
-    public TextAsset[] stages;
-    public int curStage = 0;
 
     void Awake()
     {
-        curStage = 0;
+        
     }
 
     // Update is called once per frame
@@ -20,10 +18,10 @@ public class GameManager : MonoBehaviour
 
 
 
-    public bool CheckIsGoal(Vector2Int BoxPos)
+    public bool CheckIsGoal(Vector2Int boxPos)
     {
         
-        if (leveloader.targetPositions.Contains(BoxPos))
+        if (levelLoader.targetPositions.Contains(boxPos))
         {
             return true;
         }
@@ -35,12 +33,8 @@ public class GameManager : MonoBehaviour
     {
         //TODO 스테이지 클리어 시 다음 스테이지 or 로비 or 다시 플레이 버튼 UI 띄우도록
         Debug.Log("스테이지 클리어 다음스테이지 구성");
-        foreach(Transform child in leveloader.levelParent)
-        {
-            Destroy(child.gameObject);
-        }
-        curStage += 1;
-        leveloader.LoadLevel();
+        levelLoader.curStage += 1;
+        levelLoader.LoadLevel();
     }
 
 }

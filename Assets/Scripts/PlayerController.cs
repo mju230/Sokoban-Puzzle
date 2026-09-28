@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public LevelLoader leveloader;
+    public LevelLoader levelLoader;
     public GameManager gameManager;
     // Update is called once per frame
     void Update()
@@ -27,33 +27,32 @@ public class PlayerController : MonoBehaviour
         
         Vector2Int nextPlayerPos = currentPosition + dir;
         Debug.Log($"다음 플레이어 위치 {nextPlayerPos}");
-        if (leveloader.wallPositions.Contains(nextPlayerPos)){
+        if (levelLoader.wallPositions.Contains(nextPlayerPos)){
             Debug.Log("벽에 막혀서 못갑니다");
             return;
         }
-        else if(leveloader.boxPositions.ContainsKey(nextPlayerPos))
+        else if(levelLoader.boxPositions.ContainsKey(nextPlayerPos))
         {
 
             Vector2Int currentBoxPos = nextPlayerPos;
             Vector2Int nextBoxPos = currentBoxPos + dir;
-            if (leveloader.wallPositions.Contains(nextBoxPos) || leveloader.boxPositions.ContainsKey(nextBoxPos))
+            if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos))
             {
                 Debug.Log("박스 뒤에 벽 또는 다른 박스가 있어서 못갑니다");
                 return;
             }
             else
             {
-                //현재 박스 위치 지우고 새로운 박스 위치 딕셔너리에 다시 저장
-                GameObject theBox = leveloader.boxPositions[currentBoxPos]; 
-                leveloader.boxPositions.Remove(currentBoxPos);
-                leveloader.boxPositions.Add(nextBoxPos, theBox);
+                levelLoader.MoveBox(currentBoxPos, nextBoxPos);
                 Debug.Log($"지워진 상자 위치 {currentBoxPos} 새로운 상자 위치 {nextBoxPos}");
-                theBox.transform.position = new Vector3(nextBoxPos.x, nextBoxPos.y, 0);
                 if (gameManager.CheckIsGoal(nextBoxPos))
                 {
-                    Destroy(leveloader.boxPositions[nextBoxPos]);
-                    leveloader.boxPositions.Remove(nextBoxPos);
-                    if(leveloader.boxPositions.Count == 0) gameManager.StageClear();
+                    Debug.Log("박스 골인지점 도착, 박스 삭제");
+                    levelLoader.RemoveBox(nextBoxPos);
+                    if(levelLoader.boxPositions.Count == 0) {
+                        gameManager.StageClear();
+                        return;
+                    }
                 }
                 
             }

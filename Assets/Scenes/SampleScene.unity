@@ -287,13 +287,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelLoader
   targetMarkerPrefab: {fileID: 6961118178010079320, guid: 0e5a574722b136642bd43081098a236f, type: 3}
   levelParent: {fileID: 1829131039}
-  gameManager: {fileID: 747203226}
-  levelFile: {fileID: 4900000, guid: 1118e9b7ea862e845aa9b467c402379f, type: 3}
+  stages:
+  - {fileID: 4900000, guid: a0128e99015e1b146803e3d8f620a18b, type: 3}
+  - {fileID: 4900000, guid: 1118e9b7ea862e845aa9b467c402379f, type: 3}
   wallPrefab: {fileID: 1612348180111639961, guid: 9f05a343c5baacd4c870be3c14ca7f96, type: 3}
   glitchWallPrefab: {fileID: 3226177043736049196, guid: 58d5f760d2a962446b4cb324ce4ec523, type: 3}
   boxPrefab: {fileID: 7544273731580463368, guid: d79ea5b00ca09384a9d8ff48d3fb070f, type: 3}
   floorPrefab: {fileID: 2730417802084992794, guid: 2fd32bb67ba8cb84792d8aec1760afca, type: 3}
   player: {fileID: 961874088}
+  curStage: 0
 --- !u!4 &555363516
 Transform:
   m_ObjectHideFlags: 0
@@ -422,12 +424,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 119d5d768ecbcca4b9287865e815d716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  leveloader: {fileID: 555363515}
-  currentStage: 0
-  stages:
-  - {fileID: 4900000, guid: a0128e99015e1b146803e3d8f620a18b, type: 3}
-  - {fileID: 4900000, guid: 1118e9b7ea862e845aa9b467c402379f, type: 3}
-  curStage: 0
+  levelLoader: {fileID: 555363515}
 --- !u!4 &747203227
 Transform:
   m_ObjectHideFlags: 0
@@ -465,7 +462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e787949e49c1f964284f472eff3ef027, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  leveloader: {fileID: 555363515}
+  levelLoader: {fileID: 555363515}
   gameManager: {fileID: 747203226}
 --- !u!1001 &1467530134
 PrefabInstance:

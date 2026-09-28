@@ -9,16 +9,17 @@ public class LevelLoader : MonoBehaviour
     public HashSet<Vector2Int> glitchWallPositions = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> targetPositions = new HashSet<Vector2Int>();
     public Dictionary<Vector2Int, GameObject> boxPositions = new Dictionary<Vector2Int, GameObject>();
-
+    
     public Transform levelParent;
 
-    public GameManager gameManager;
-    public TextAsset levelFile; // 텍스트 파일
+    public TextAsset[] stages;
     public GameObject wallPrefab;
     public GameObject glitchWallPrefab;
     public GameObject boxPrefab;
     public GameObject floorPrefab;
     public Transform player; 
+
+    public int curStage = 0;
 
     void Start()
     {
@@ -27,16 +28,20 @@ public class LevelLoader : MonoBehaviour
 
     public void LoadLevel()
     {
-        //레벨 로드 하기 전에 리스트나 딕셔너리 다 비우기(다음 스테이지)
+        //레벨 로드 하기 전에 필요한 부분들 다 지우기(다음 스테이지)
         wallPositions.Clear();
         glitchWallPositions.Clear();
         targetPositions.Clear();
         boxPositions.Clear();
-        levelFile = gameManager.stages[gameManager.curStage];
-        string[] rows = levelFile.text.Split('\n');
+        foreach (Transform child in levelParent)
+        {
+            Destroy(child.gameObject);
+        }
+        string[] rows = stages[curStage].text.Split('\n');
 
         for (int row = 0; row < rows.Length; row++)
         {
+
             for (int col = 0; col < rows[row].Length; col++)
             {
                 char symbol = rows[row][col];
@@ -77,5 +82,19 @@ public class LevelLoader : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void MoveBox(Vector2Int from, Vector2Int to)
+    {
+        GameObject theBox = boxPositions[from];
+        boxPositions.Remove(from);
+        boxPositions.Add(to, theBox);
+        theBox.transform.position = new Vector3(to.x, to.y, 0);
+    }
+
+    public void RemoveBox(Vector2Int boxPos)
+    {
+        Destroy(boxPositions[boxPos]);
+        boxPositions.Remove(boxPos);
     }
 }
