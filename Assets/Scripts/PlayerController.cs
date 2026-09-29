@@ -10,10 +10,11 @@ public class PlayerController : MonoBehaviour
     {
         Vector2Int moveDir = Vector2Int.zero;
 
-        if(Keyboard.current.wKey.wasPressedThisFrame) moveDir = Vector2Int.up;
-        else if(Keyboard.current.sKey.wasPressedThisFrame) moveDir = Vector2Int.down;
-        else if (Keyboard.current.aKey.wasPressedThisFrame) moveDir = Vector2Int.left;
-        else if (Keyboard.current.dKey.wasPressedThisFrame) moveDir = Vector2Int.right;
+        if(Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame) moveDir = Vector2Int.up;
+        else if(Keyboard.current.sKey.wasPressedThisFrame || Keyboard.current.downArrowKey.wasPressedThisFrame) moveDir = Vector2Int.down;
+        else if (Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame) moveDir = Vector2Int.left;
+        else if (Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame) moveDir = Vector2Int.right;
+        
 
         if(moveDir != Vector2Int.zero)
         {
@@ -27,6 +28,7 @@ public class PlayerController : MonoBehaviour
         
         Vector2Int nextPlayerPos = currentPosition + dir;
         Debug.Log($"다음 플레이어 위치 {nextPlayerPos}");
+        
         if (levelLoader.wallPositions.Contains(nextPlayerPos)){
             Debug.Log("벽에 막혀서 못갑니다");
             return;
@@ -36,9 +38,11 @@ public class PlayerController : MonoBehaviour
 
             Vector2Int currentBoxPos = nextPlayerPos;
             Vector2Int nextBoxPos = currentBoxPos + dir;
-            if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos))
+            
+            if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos)|| 
+                        levelLoader.glitchWallPositions.ContainsKey(nextBoxPos))
             {
-                Debug.Log("박스 뒤에 벽 또는 다른 박스가 있어서 못갑니다");
+                Debug.Log("박스 뒤에 벽 또는 다른 박스 또는 글리치 벽이 있어서 못갑니다");
                 return;
             }
             else
@@ -57,8 +61,12 @@ public class PlayerController : MonoBehaviour
                 
             }
         }
-
+        
         transform.position = new Vector3 (nextPlayerPos.x, nextPlayerPos.y, 0);
+        if (levelLoader.glitchWallPositions.ContainsKey(currentPosition))
+        {
+            levelLoader.GWallToWall(currentPosition);
+        }
     }
 
     // vector3 에서 vector2int로 교환하는 함수

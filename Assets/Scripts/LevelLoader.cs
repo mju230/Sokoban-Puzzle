@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -6,8 +8,8 @@ public class LevelLoader : MonoBehaviour
 {
     public GameObject targetMarkerPrefab;
     public HashSet<Vector2Int> wallPositions = new HashSet<Vector2Int>();
-    public HashSet<Vector2Int> glitchWallPositions = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> targetPositions = new HashSet<Vector2Int>();
+    public Dictionary<Vector2Int, GameObject> glitchWallPositions = new Dictionary<Vector2Int, GameObject>();
     public Dictionary<Vector2Int, GameObject> boxPositions = new Dictionary<Vector2Int, GameObject>();
     
     public Transform levelParent;
@@ -56,8 +58,8 @@ public class LevelLoader : MonoBehaviour
                         break;
 
                     case 'G': // 글리치 벽
-                        Instantiate(glitchWallPrefab, new Vector3(x,y,0), Quaternion.identity, levelParent);
-                        glitchWallPositions.Add(new Vector2Int(x, y));
+                        GameObject glitchWall = Instantiate(glitchWallPrefab, new Vector3(x,y,0), Quaternion.identity, levelParent);
+                        glitchWallPositions.Add(new Vector2Int(x, y), glitchWall);
                         break;
 
                     case 'B': // 박스
@@ -96,5 +98,15 @@ public class LevelLoader : MonoBehaviour
     {
         Destroy(boxPositions[boxPos]);
         boxPositions.Remove(boxPos);
+    }
+
+
+    // 한번 지나간 글리치 벽을 일반 벽으로 변환
+    public void GWallToWall(Vector2Int curPos)
+    {
+        Destroy(glitchWallPositions[curPos]);
+        glitchWallPositions.Remove(curPos);
+        Instantiate(wallPrefab, new Vector3(curPos.x,curPos.y, 0), quaternion.identity);
+        wallPositions.Add(curPos);
     }
 }
