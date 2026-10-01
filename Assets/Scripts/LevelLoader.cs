@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -11,34 +9,31 @@ public class LevelLoader : MonoBehaviour
     public HashSet<Vector2Int> targetPositions = new HashSet<Vector2Int>();
     public Dictionary<Vector2Int, GameObject> glitchWallPositions = new Dictionary<Vector2Int, GameObject>();
     public Dictionary<Vector2Int, GameObject> boxPositions = new Dictionary<Vector2Int, GameObject>();
-    
+    public Dictionary<Vector2Int, GameObject> overflowWallPositions = new Dictionary<Vector2Int, GameObject>();
+
     public Transform levelParent;
 
     public TextAsset[] stages;
     public GameObject wallPrefab;
     public GameObject glitchWallPrefab;
+    public GameObject overflowWallPrefab;
+    public GameObject crackedGlitchWallPrefab;
     public GameObject boxPrefab;
     public GameObject floorPrefab;
+
     public Transform player; 
 
     public int curStage = 0;
 
     void Start()
     {
-        LoadLevel();
+        
     }
 
     public void LoadLevel()
     {
         //레벨 로드 하기 전에 필요한 부분들 다 지우기(다음 스테이지)
-        wallPositions.Clear();
-        glitchWallPositions.Clear();
-        targetPositions.Clear();
-        boxPositions.Clear();
-        foreach (Transform child in levelParent)
-        {
-            Destroy(child.gameObject);
-        }
+        CleanCurrentStage();
         string[] rows = stages[curStage].text.Split('\n');
 
         for (int row = 0; row < rows.Length; row++)
@@ -60,6 +55,11 @@ public class LevelLoader : MonoBehaviour
                     case 'G': // 글리치 벽
                         GameObject glitchWall = Instantiate(glitchWallPrefab, new Vector3(x,y,0), Quaternion.identity, levelParent);
                         glitchWallPositions.Add(new Vector2Int(x, y), glitchWall);
+                        break;
+
+                    case 'O': // 오버플로우 벽
+                        GameObject overflowWall = Instantiate(overflowWallPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
+                        overflowWallPositions.Add(new Vector2Int(x,y), overflowWall);
                         break;
 
                     case 'B': // 박스
@@ -106,7 +106,21 @@ public class LevelLoader : MonoBehaviour
     {
         Destroy(glitchWallPositions[curPos]);
         glitchWallPositions.Remove(curPos);
-        Instantiate(wallPrefab, new Vector3(curPos.x,curPos.y, 0), quaternion.identity);
+        Instantiate(crackedGlitchWallPrefab, new Vector3(curPos.x,curPos.y, 0), Quaternion.identity,levelParent);
         wallPositions.Add(curPos);
     }
+
+    public void CleanCurrentStage()
+    {
+        wallPositions.Clear();
+        glitchWallPositions.Clear();
+        targetPositions.Clear();
+        boxPositions.Clear();
+        overflowWallPositions.Clear();
+        foreach (Transform child in levelParent)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
 }

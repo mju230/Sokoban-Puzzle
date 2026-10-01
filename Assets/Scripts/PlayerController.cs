@@ -5,9 +5,11 @@ public class PlayerController : MonoBehaviour
 {
     public LevelLoader levelLoader;
     public GameManager gameManager;
+    
     // Update is called once per frame
     void Update()
     {
+        if (gameManager.CurrentState != GameManager.GameState.Playing) return;
         Vector2Int moveDir = Vector2Int.zero;
 
         if(Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame) moveDir = Vector2Int.up;
@@ -29,8 +31,8 @@ public class PlayerController : MonoBehaviour
         Vector2Int nextPlayerPos = currentPosition + dir;
         Debug.Log($"다음 플레이어 위치 {nextPlayerPos}");
         
-        if (levelLoader.wallPositions.Contains(nextPlayerPos)){
-            Debug.Log("벽에 막혀서 못갑니다");
+        if (levelLoader.wallPositions.Contains(nextPlayerPos) || levelLoader.overflowWallPositions.ContainsKey(nextPlayerPos)){
+            Debug.Log("벽 또는 오버플로벽에 막혀서 못갑니다");
             return;
         }
         else if(levelLoader.boxPositions.ContainsKey(nextPlayerPos))
@@ -39,7 +41,29 @@ public class PlayerController : MonoBehaviour
             Vector2Int currentBoxPos = nextPlayerPos;
             Vector2Int nextBoxPos = currentBoxPos + dir;
             
-            if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos)|| 
+
+            if(levelLoader.overflowWallPositions.ContainsKey(nextBoxPos)){
+
+                Vector2Int landingPos = nextBoxPos; 
+                while (levelLoader.overflowWallPositions.ContainsKey(landingPos)) // 연속으로 BOO. 있을 때 대비
+                {
+                    landingPos += dir;
+                }
+
+                if(levelLoader.boxPositions.ContainsKey(landingPos)||
+                    levelLoader.wallPositions.Contains(landingPos)||levelLoader.glitchWallPositions.ContainsKey(landingPos)){
+                    Debug.Log("오버플로우 월 뒤에 박스 뒤에 벽 또는 다른 박스 또는 글리치 벽이 있어서 못갑니다");
+                    return;
+                }
+                else
+                {
+                    levelLoader.MoveBox(currentBoxPos, landingPos);
+                    Debug.Log($"지워진 상자 위치 {currentBoxPos} 새로운 상자 위치 {landingPos}");
+                    gameManager.CheckBoxArrival(landingPos);
+                }
+
+            }
+            else if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos)|| 
                         levelLoader.glitchWallPositions.ContainsKey(nextBoxPos))
             {
                 Debug.Log("박스 뒤에 벽 또는 다른 박스 또는 글리치 벽이 있어서 못갑니다");
@@ -49,15 +73,7 @@ public class PlayerController : MonoBehaviour
             {
                 levelLoader.MoveBox(currentBoxPos, nextBoxPos);
                 Debug.Log($"지워진 상자 위치 {currentBoxPos} 새로운 상자 위치 {nextBoxPos}");
-                if (gameManager.CheckIsGoal(nextBoxPos))
-                {
-                    Debug.Log("박스 골인지점 도착, 박스 삭제");
-                    levelLoader.RemoveBox(nextBoxPos);
-                    if(levelLoader.boxPositions.Count == 0) {
-                        gameManager.StageClear();
-                        return;
-                    }
-                }
+                gameManager.CheckBoxArrival(nextBoxPos);
                 
             }
         }
@@ -67,6 +83,8 @@ public class PlayerController : MonoBehaviour
         {
             levelLoader.GWallToWall(currentPosition);
         }
+
+        gameManager.CheckStageClear();
     }
 
     // vector3 에서 vector2int로 교환하는 함수
