@@ -31,7 +31,9 @@ public class PlayerController : MonoBehaviour
         Vector2Int nextPlayerPos = currentPosition + dir;
         Debug.Log($"다음 플레이어 위치 {nextPlayerPos}");
         
-        if (levelLoader.wallPositions.Contains(nextPlayerPos) || levelLoader.overflowWallPositions.ContainsKey(nextPlayerPos)){
+        if (!levelLoader.allTilePositions.Contains(nextPlayerPos)||levelLoader.wallPositions.Contains(nextPlayerPos) 
+                || levelLoader.overflowWallPositions.Contains(nextPlayerPos))
+        {
             Debug.Log("벽 또는 오버플로벽에 막혀서 못갑니다");
             return;
         }
@@ -42,16 +44,15 @@ public class PlayerController : MonoBehaviour
             Vector2Int nextBoxPos = currentBoxPos + dir;
             
 
-            if(levelLoader.overflowWallPositions.ContainsKey(nextBoxPos)){
+            if(levelLoader.overflowWallPositions.Contains(nextBoxPos)){
 
                 Vector2Int landingPos = nextBoxPos; 
-                while (levelLoader.overflowWallPositions.ContainsKey(landingPos)) // 연속으로 BOO. 있을 때 대비
+                while (levelLoader.overflowWallPositions.Contains(landingPos)) // 연속으로 BOO. 있을 때 대비
                 {
                     landingPos += dir;
                 }
 
-                if(levelLoader.boxPositions.ContainsKey(landingPos)||
-                    levelLoader.wallPositions.Contains(landingPos)||levelLoader.glitchWallPositions.ContainsKey(landingPos)){
+                if(!levelLoader.CanBoxLand(landingPos)){
                     Debug.Log("오버플로우 월 뒤에 박스 뒤에 벽 또는 다른 박스 또는 글리치 벽이 있어서 못갑니다");
                     return;
                 }
@@ -63,8 +64,21 @@ public class PlayerController : MonoBehaviour
                 }
 
             }
-            else if (levelLoader.wallPositions.Contains(nextBoxPos) || levelLoader.boxPositions.ContainsKey(nextBoxPos)|| 
-                        levelLoader.glitchWallPositions.ContainsKey(nextBoxPos))
+            else if (levelLoader.teleportPositions.ContainsKey(nextBoxPos))
+            {
+                Vector2Int landingPos = levelLoader.teleportPositions[nextBoxPos]+dir;
+
+                if(!levelLoader.CanBoxLand(landingPos))
+                {
+                    Debug.Log("현재 텔레포트 방향에 벽, 다른 박스 또는 글리치 벽이 있어서 못갑니다.");
+                    return;
+                }
+                levelLoader.MoveBox(currentBoxPos, landingPos);
+                Debug.Log($"지워진 상자 위치 {currentBoxPos} 새로운 상자 위치 {landingPos}");
+                gameManager.CheckBoxArrival(landingPos);
+                
+            }
+            else if (!levelLoader.CanBoxLand(nextBoxPos))
             {
                 Debug.Log("박스 뒤에 벽 또는 다른 박스 또는 글리치 벽이 있어서 못갑니다");
                 return;

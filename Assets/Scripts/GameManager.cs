@@ -114,12 +114,18 @@ public class GameManager : MonoBehaviour
     public void OnStageButtonClick(int stageIndex)
     {
         levelLoader.curStage = stageIndex;
+
+        if (!levelLoader.LoadLevel())
+        {
+            return;
+        }
+        
         selectChapterPanel.SetActive(false);
         chapterOnePanel.SetActive(false);
         chapterTwoPanel.SetActive(false);
         chapterThreePanel.SetActive(false);
         mainPanel.SetActive(false);
-        levelLoader.LoadLevel();
+
         CurrentState = GameState.Playing;
     }
 
