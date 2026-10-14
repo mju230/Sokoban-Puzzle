@@ -123,7 +123,8 @@ public class LevelLoader : MonoBehaviour
         }
         Vector2Int pos = new Vector2Int(x, y);
         Instantiate(floorPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
-        Instantiate(teleportEntPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
+        GameObject portal = Instantiate(teleportEntPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
+        portal.GetComponent<PortalVisual>().Initialize(symbol - '1');
         pendingEntrance[symbol - '1'] = pos;
     }
     private void CreateExitPortal(int x, int y, char symbol)
@@ -135,7 +136,8 @@ public class LevelLoader : MonoBehaviour
         }
         Vector2Int pos = new Vector2Int(x, y);
         Instantiate(floorPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
-        Instantiate(teleportExitPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
+        GameObject portal = Instantiate(teleportExitPrefab, new Vector3(x, y, 0), Quaternion.identity, levelParent);
+        portal.GetComponent<PortalVisual>().Initialize(symbol - 'a');
         pendingExit[symbol - 'a'] = pos;
         portalExitPositions.Add(pos);
     }
